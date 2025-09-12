@@ -10,25 +10,65 @@
     <script src="https://unpkg.com/supersimpledev/react.js"></script>
     <script src="https://unpkg.com/supersimpledev/react-dom.js"></script>
 
+    <script src="https://unpkg.com/supersimpledev/chatbot.js"></script>
+
     <!-- Babel compiler para JSX, traduce JSX a JavaScript normal en el navegador -->
     <script src="https://unpkg.com/supersimpledev/babel.js"></script>
     <!-- Nuestro código React en JSX --> 
     <script type="text/babel">
 
-        // Componente ChatInput que retorna un input y un botón
-        function ChatInput() { 
+        // ==================== COMPONENTE REACT: ChatInput ====================
+        // Componente que maneja el input de texto y botón de envío
+        function ChatInput({ chatMessages, setChatMessages }) { 
+            const [inputText, setInputText] = React.useState('');
+
+            function saveInputText (event) {
+                setInputText(event.target.value);
+            }
+
+            function sendMessage(){
+                const newChatMessages = [
+                    ...chatMessages, {
+                        message: inputText,
+                        sender: "user",
+                        id: crypto.randomUUID()
+                    }
+                ]
+
+                setChatMessages(newChatMessages);
+                
+                const response = Chatbot.getResponse(inputText);
+                console.log(response);
+                  setChatMessages([
+                    ...newChatMessages, 
+                    {
+                        message: response,
+                        sender: "robot",
+                        id: crypto.randomUUID()
+                    }
+                ]);
+
+                setInputText('');
+            }
+
             return (
                 <>
                     <input 
                         type="text" 
                         placeholder="Send a message to Chatbot" 
                         size="30" 
+                        onChange = {saveInputText}
+                        value = {inputText}
                     />
-                    <button>Send</button>
+                    <button
+                    onClick={sendMessage}
+                    >Send</button>
                 </>
             )
         }  
 
+        // ==================== COMPONENTE REACT: ChatMessage ====================
+        // Componente que renderiza un mensaje individual del chat
         function ChatMessage({ message, sender }) {
             //const message = props.message;
             //const sender = props.sender;
@@ -57,31 +97,64 @@
             )
         }
     
-        // Renderizamos el componente ChatInput dentro del contenedor 
-
-        function App() {
+        // ==================== COMPONENTE REACT: ChatMessages ====================
+        // Componente que maneja el estado y renderiza la lista de mensajes
+        function ChatMessages({ chatMessages }) {
             return (
                 <>
-                    <ChatInput />
-                    <ChatMessage 
-                        message= "hello chatbot!" 
-                        sender = "user"
-                    />
-                    <ChatMessage 
-                        message= "Hello! How can I help you?" 
-                        sender = "robot"
-                    />
-                    <ChatMessage 
-                        message= "can you get me todays date?" 
-                        sender = "user"
-                    />
-                    <ChatMessage 
-                        message= "Today is September 10th" 
-                        sender = "robot"
-                    />
-                </>       
+                    
+
+                    {chatMessages.map((chatMessage) => {
+                        return (
+                            <ChatMessage 
+                                message = {chatMessage.message} 
+                                sender = {chatMessage.sender}
+                                key = {chatMessage.id}
+                            />
+                        );
+                    })}
+                </>
             );
         }
+
+        // ==================== COMPONENTE REACT: App ====================
+        // Componente principal que renderiza toda la aplicación
+        function App() {
+
+             const [chatMessages, setChatMessages] = React.useState( [{
+                message: "hello chatbot!",
+                sender: "user",
+                id: 'id1'
+            }, {
+                message: "Hello! How can I help you?",
+                sender: "robot",
+                id: 'id2' 
+                }, { 
+                message: "can you get me todays date?", 
+                sender: "user", 
+                id: 'id3' 
+                }, { 
+                message: "Today is September 10th", 
+                sender: "robot", 
+                id: 'id4' 
+                }]);
+           // const [chatMessages, setChatMessages] = array; // destructuring
+            /*const chatMessages = array[0]; // estado actual
+            const setChatMessages = array[1]; // función para actualizar el estado*/
+            return (
+                <>
+                    <ChatInput 
+                    chatMessages={chatMessages}
+                    setChatMessages={setChatMessages}
+                    />
+                    <ChatMessages 
+                    chatMessages={chatMessages}
+                    />
+                </>
+            );
+        }
+
+
        
 
       // Seleccionamos el contenedor y renderizamos la aplicación React en él 
