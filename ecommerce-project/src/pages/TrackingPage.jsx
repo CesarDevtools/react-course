@@ -6,7 +6,7 @@ export function TrackingPage() {
         <> 
             
         <title>Order Tracking</title> 
-        <Header />
+        <Header cart={[]} />
 
         <div className="tracking-page">
         <div className="order-tracking">
